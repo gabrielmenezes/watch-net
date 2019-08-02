@@ -1,0 +1,19 @@
+{
+  "name": "watch-net",
+  "version": "1.0.0",
+  "description": "Net Watcher to Health-Check Network",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabrielmenezes/watch-net.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabrielmenezes/watch-net/issues"
+  },
+  "homepage": "https://github.com/gabrielmenezes/watch-net#readme"
+}
