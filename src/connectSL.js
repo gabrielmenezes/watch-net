@@ -29,6 +29,19 @@ const https = require('http');
     });
 }
 
-getDataEm7('gsoares','Xdr4593!05','/api/device/3092')
-    .then(result => console.log(result))
+!getDataEm7('gsoares','Xdr4593!05','/api/device?limit=100&filter.name.contains=ACGW')
+    .then(result => {
+        const { result_set } = result;
+        result_set.forEach(element => {
+            const { URI } = element;
+            if (URI){
+                getDataEm7('gsoares','Xdr4593!05',URI)
+                    .then(result =>{
+                        const { ip } = result;
+                        console.log(ip);
+                    })
+                    .catch(err => console.log(err));
+            }
+        }); 
+    })
     .catch(err => console.log(err));
