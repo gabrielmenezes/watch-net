@@ -5,11 +5,10 @@ const routes = require('./routes');
 
 const server = express();
 
-mongoose.connect('mongodb://localhost:27017/watch-net',{
+mongoose.connect('mongodb://198.18.3.31:27017/watch-net',{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
-
 
 // GET, POST, PUT, DELETE
 
