@@ -1,8 +1,9 @@
- const request = require('request');
- const HTMLParser = require('node-html-parser');
-
+var exec = require('ssh-exec');
+const checkIP = require('ip');
+ 
 const Acgw = require('../Models/Acgw');
 const Em7 = require('./Em7Controller');
+const Hr = require('./HrController');
 
 module.exports = {
 
@@ -32,25 +33,35 @@ module.exports = {
             }).catch(err => { return res.json(err)});
     },
 
-    getHrAcgw(req, res){
+    async getHrAcgw(req, res){
 
-        //if(!acgw){ return "Not found ACGW"; }
+        const { host } = req.body;
 
-         let options = {
-             host: '100.124.248.3',
-             port: 80,
-             method: 'GET'
-         };
-
-         var url = 'http://root:hughes01@100.124.248.3'
-
-         request({url: url}, (err, res, body) => {
-            if(!err){
-                console.log(HTMLParser.parse(body));
-            }
-        });
-
-
+        command = "gawk -F: '{ print $1\",\"$2\",\"$3\",\"}' /tmp/registeredAAonGw.txt";
         
+        exec(command, {
+        user: 'root',
+        host: host, 
+        password: 'hughes01'
+        }, async (err, stdout, stderr)=>{
+            if (err) { return res.status(404).send(err); }
+            let dados = stdout.toString().replace(/\r?\n|\r/g, "").split(',');
+            let remota = [];
+            for (i = 0; i < dados.length; i+=3){
+                name = dados[i];
+                ip = dados[i+1];
+                serial = dados [i+2];
+                nameD = name.replace(/AA/i,'D');
+
+                test = checkIP.toLong(ip + "") - 1;
+                ipD = checkIP.fromLong(test);
+
+                if (!name || !ip || !serial)
+                    continue;
+                remota.push(await Hr.store( name, ip, serial, nameD, ipD ));
+            }
+
+            return res.json(remota);
+        });
     }
 }
