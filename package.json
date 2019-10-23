@@ -19,8 +19,11 @@
   "homepage": "https://github.com/gabrielmenezes/watch-net#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "ip": "^1.1.5",
     "mongoose": "^5.7.5",
-    "node-ssh": "^6.0.0"
+    "node-ssh": "^6.0.0",
+    "request": "^2.88.0",
+    "ssh-exec": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.4"
