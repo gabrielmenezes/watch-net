@@ -8,6 +8,7 @@ var getResultadoPing = /packets received, (\d*)%/i;
 var getMediaMs = /\/(\d*\.?\d*)\//i;
 
 module.exports = {  
+
     async store(name, ip, serial, nameD, ipD){
         
         let remota = await Remota.findOne({serial});
@@ -21,6 +22,8 @@ module.exports = {
 
     async testWanA(ipRemota){
         return new Promise((resolve, reject) =>{
+            
+            
             commands = "execute ping-options reset" + os.EOL + "execute ping-options interface wan1" + os.EOL + "execute ping 8.8.8.8";
 
             exec(commands, {
@@ -28,7 +31,7 @@ module.exports = {
                 host: ipRemota, 
                 password: 'LpHzayMEeRLB11Zo'
                 }, (err, stdout, stderr)=>{
-                    if (err) { reject([false , Infinity]); }
+                    if (err) { console.log(err);reject([false , Infinity]); }
         
                     let dados = stdout.toString();
         
@@ -39,7 +42,7 @@ module.exports = {
                     if(Array.isArray(mediaMs)) { retornaMs = mediaMs[1]; } 
         
                     resolve([retornaPing, retornaMs]);
-            });
+            }).id;
         });
     },
 
@@ -52,7 +55,7 @@ module.exports = {
             host: ipRemota, 
             password: 'LpHzayMEeRLB11Zo'
             }, (err, stdout, stderr)=>{
-                if (err) { reject([false , Infinity]); }
+                if (err) { console.log(err);reject([false , Infinity]); }
 
                 let dados = stdout.toString();
 
@@ -77,7 +80,7 @@ module.exports = {
             host: ipRemota, 
             password: 'LpHzayMEeRLB11Zo'
             }, (err, stdout, stderr)=>{
-                if (err) { reject(false); }
+                if (err) { console.log(err);reject(false); }
 
                 let dados = stdout.toString();
 
@@ -91,20 +94,42 @@ module.exports = {
         });
     },
 
-    async testRemota(ipRemota){
+    async testRemota(ipRemota, ipRemotaAA){
         let checkWanA = [false,Infinity], checkWanB = [false,Infinity], testAA = false;
-        HrController.testWanA(ipRemota).then(retorno => { checkWanA = retorno; }).catch( err => { checkWanA = err; });
-        HrController.testWanB(ipRemota).then(retorno => { checkWanA = retorno; }).catch( err => { checkWanA = err; });
-        HrController.testAA(ipRemota).then(retorno => { testAA = retorno; }).catch( err => { testAA = err; });
+        await this.testWanA(ipRemota).then(retorno => { checkWanA = retorno; }).catch( err => { checkWanA = err; });
+        await this.testWanB(ipRemota).then(retorno => { checkWanA = retorno; }).catch( err => { checkWanA = err; });
+        await this.testAA(ipRemota, ipRemotaAA).then(retorno => { testAA = retorno; }).catch( err => { testAA = err; });
 
-        let remota = await Remota.findOne({ip: ipRemota});
+        let remota = await Remota.findOne({ip: ipRemotaAA});
 
         if(!remota){ return "IPNAOEXISTE"; }
-
+        
         let testRemota = await TestRemota.create({ nameD: remota.nameD , wan1connection: checkWanA[0], wan2connection: checkWanB[0], wan1averageMs: checkWanA[1], wan2averageMs: checkWanB[1],
-            aaConnection: testAA });
+            aaConnection: testAA, 
+            date : new Date().toString()
+        });
 
-        return testRemota;
+        console.log(testRemota);
+    },
 
+    async startCollect (){
+        
+        var remotas = await Remota.find();
+
+        remotas.forEach(remota => {
+            this.testRemota(remota.ipD, remota.ip);
+        });
+
+        /*return setInterval(async function () {
+           remotas.forEach(remota => {
+                this.testRemota(remota.ipD, remota.ip);
+           });
+        }, 1800000);*/
+    
+    },
+
+    stopCollect (intervalo) {
+        clearInterval(intervalo);
     }
+
 };

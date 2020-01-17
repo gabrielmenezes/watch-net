@@ -23,7 +23,7 @@
     "mongoose": "^5.7.5",
     "node-ssh": "^6.0.0",
     "request": "^2.88.0",
-    "ssh-exec": "^2.0.0"
+    "ssh2": "^0.8.7"
   },
   "devDependencies": {
     "nodemon": "^1.19.4"
